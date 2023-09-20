@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions", "postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions      = [pgcrypto]
+}
+
+model compatibility {
+  id                                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user1_id                          String   @db.Uuid
+  user2_id                          String   @db.Uuid
+  percentage                        Int
+  date_calculated                   DateTime @default(now()) @db.Timestamp(6)
+  created_at                        DateTime @default(now()) @db.Timestamp(6)
+  updated_at                        DateTime @default(now()) @db.Timestamp(6)
+  user_compatibility_user1_idTouser user     @relation("compatibility_user1_idTouser", fields: [user1_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  user_compatibility_user2_idTouser user     @relation("compatibility_user2_idTouser", fields: [user2_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  share                             share[]
+}
+
+model device_info {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model error_logs {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model instruction {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description  String   @db.VarChar(255)
+  date_created DateTime @default(now()) @db.Timestamp(6)
+  user_id      String   @db.Uuid
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  updated_at   DateTime @default(now()) @db.Timestamp(6)
+  user         user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model love_calculations {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model reset {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id    String   @db.Uuid
+  date_reset DateTime @default(now()) @db.Timestamp(6)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  user       user     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model share {
+  id               String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  compatibility_id String        @db.Uuid
+  platform         String        @db.VarChar(255)
+  date_shared      DateTime      @default(now()) @db.Timestamp(6)
+  created_at       DateTime      @default(now()) @db.Timestamp(6)
+  updated_at       DateTime      @default(now()) @db.Timestamp(6)
+  compatibility    compatibility @relation(fields: [compatibility_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model shared_results {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
+
+model team {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  description  String?   @db.VarChar(255)
+  date_created DateTime? @default(now()) @db.Timestamp(6)
+  name         String    @db.VarChar(255)
+  created_at   DateTime  @default(now()) @db.Timestamp(6)
+  updated_at   DateTime  @default(now()) @db.Timestamp(6)
+  user_id      String    @db.Uuid
+  tenant_id    String    @db.VarChar(255)
+  user         user      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user {
+  id                                         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                                      String          @unique @db.VarChar(255)
+  firstName                                  String?         @db.VarChar(255)
+  lastName                                   String?         @db.VarChar(255)
+  roq_user_id                                String          @db.VarChar(255)
+  tenant_id                                  String          @db.VarChar(255)
+  created_at                                 DateTime        @default(now()) @db.Timestamp(6)
+  updated_at                                 DateTime        @default(now()) @db.Timestamp(6)
+  compatibility_compatibility_user1_idTouser compatibility[] @relation("compatibility_user1_idTouser")
+  compatibility_compatibility_user2_idTouser compatibility[] @relation("compatibility_user2_idTouser")
+  instruction                                instruction[]
+  reset                                      reset[]
+  team                                       team[]
+}
+
+model user_preferences {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+}
